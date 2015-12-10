@@ -26,7 +26,7 @@ if(empty($_SERVER['REMOTE_ADDR']) == false) {
 //This is the real connecting IP variable. 
 $connectingip = (string)$_SERVER['REMOTE_ADDR'];
 
-//Servers are stupid. I just get a .json file. 
+//Databases are stupid. I just get a .json file. 
 $oldIDs = file_get_contents('ids.json');
 
 $idArray = json_decode($oldIDs,true);
@@ -36,7 +36,7 @@ $idArray = json_decode($oldIDs,true);
 $oldArray = $idArray['ids'];
 $newIDs = array();
 
-/* This is the real last tweet thing I'm using. */
+/* This is the real last tweet thing I'm using. File simply contains the last tweet picked up */
 $lastTweet = file_get_contents('lastid.txt');
 //var_dump($lastTweet);
 
@@ -71,17 +71,27 @@ if(!($most_recent)) {
 }
 //Reverse the tweets so we'll cycle older to newest.
 $trumpTweets = array_reverse($trumpTweets);
-//var_dump($trumpTweets);
+//this is where i count how many tweets i actually can use
 $usuableTweets = 0;
 foreach($trumpTweets as $tt) {
 
 //Check to make sure it's not a reply or fav
 $tweet = $tt['text'];
 $tweet_id = $tt['id_str'];
-//var_dump($tweet_id);
+//Break each tweet into little "word" blocks.
 $tweet_exploded = explode(" ", $tweet);
 
+/*
+Since we only wanted to tweet donald trumps ACTUAL tweets. Not his replies, retweets or weird quote retweets.
+Explanation of all the if statements:
+$tt['in_reply_to_user_id'] == NULL : If it's not a reply to someone else
+strpos($tweet_exploded[0], '"@') === false : Make sure it's not one of his weird "quote retweet" things
+$tweet_exploded[0] !== 'RT' : make sure it's not a reply
+!(in_array($tweet_id,$oldArray)) : make sure we didn't already tweet it. Probably not needed at this point. 
+*/
 if($tt['in_reply_to_user_id'] == NULL && strpos($tweet_exploded[0], '"@') === false && $tweet_exploded[0] !== 'RT' && !(in_array($tweet_id,$oldArray))) {
+// YAY THIS ONE IS GOOD TO GO
+
 //THIS ONE IS REAL
 //echo 'afasf';
 $exclaimCount = 0;
@@ -89,6 +99,7 @@ $exclaimLink = 0;
 $toTweetString = '';
 	//LOOP THROUGH WORDS
 	foreach($tweet_exploded as $te) {
+		//explanation
 		if(strpos($te,'!') !== false && strpos($te, 'http') == false) {
 			$toTweetString .= str_replace("!","?",$te).' ';
 			$exclaimCount++;
