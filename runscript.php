@@ -8,6 +8,15 @@ Please don't judge me you cool guys.
 
 */
 
+//GET A SECRET URL PARAMETER
+$pass = $_GET["passphrase"];
+
+//If your passphrase variable isn't correct, SHUT IT DOWN
+if($pass !== 'yoursecretphrase') {
+	echo 'ACCESS DENIED';
+	die();
+}
+
 //This is so errors won't kill the script
 ini_set('display_errors', false);
 
